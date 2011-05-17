@@ -35,11 +35,17 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-var init = require("../../lib/init");
+var head = require("../../lib/init");
 var services = require("../../lib/services");
 
+
 function setupModule(aModule) {
-  init.testModule(aModule);
+  head.setup(aModule);
+}
+
+
+function teardownModule(module) {
+  head.teardown(module);
 }
 
 
