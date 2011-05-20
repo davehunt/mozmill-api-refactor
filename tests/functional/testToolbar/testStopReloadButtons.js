@@ -22,6 +22,7 @@
  *   Henrik Skupin <hskupin@mozilla.com>
  *   Aaron Train <atrain@mozilla.com>
  *   Geo Mealer <gmealer@mozilla.com>
+ *   Owen Coutts <ocoutts@mozilla.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -37,62 +38,48 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+// Include required modules
 var head = require("../../../lib/head");
 var widgets = require("../../../lib/ui/widgets");
-
-const LOCAL_TEST_FOLDER = collector.addHttpResource('../../../data/');
-const LOCAL_TEST_PAGES = [
-  {url: LOCAL_TEST_FOLDER + 'layout/mozilla.html', id: 'community'},
-  {url: LOCAL_TEST_FOLDER + 'layout/mozilla_mission.html', id: 'mission_statement'},
-  {url: LOCAL_TEST_FOLDER + 'layout/mozilla_grants.html', id: 'accessibility'}
-];
-
 
 function setupModule(aModule) {
   head.setup(aModule);
 }
 
-
-function teardownModule(module) {
-  head.teardown(module);
+function teardownModule(aModule) {
+  head.teardown(aModule);
 }
 
+const URL = "http://www.mozilla.com/en-US/";
 
 /**
- * Test the back and forward buttons
+ * Test the stop and reload buttons
  */
-function testBackAndForward() {
-  // Open up the list of local pages statically assigned in the array
-  LOCAL_TEST_PAGES.forEach(function (localPage) {
-    browser.openURL(localPage.url);
-    var element = new widgets.Element("id", localPage.id, browser.content.activeTab);
-    assert.ok(element.exists, "element exists");
+var testStopAndReload = function()
+{
+  // Make sure we have a blank page
+  browser.openURL("about:blank");
+
+  // Go to the URL without waiting and start loading for some milliseconds
+  browser.openURL(URL, 0);
+  browser.ui.navBar.stopButton.click();
+
+  // Even an element at the top of a page shouldn't exist when we hit the stop
+  // button extremely fast
+  var header = new widgets.Element("id", "header", browser.content.activeTab);
+  assert.ok(!header.exists, "Header does not exist");
+
+  // Reload, wait for it to completely loading and test again
+  browser.openURL(URL);
+
+  var header = new widgets.Element("id", "header", browser.content.activeTab);
+  driver.waitFor(function () {
+    return header.exists;
   });
-
-  // Click on the Back button for the number of local pages visited
-  for (var i = LOCAL_TEST_PAGES.length - 2; i >= 0; i--) {
-    browser.ui.navBar.backButton.click();
-
-    var element = new widgets.Element("id", LOCAL_TEST_PAGES[i].id, browser.content.activeTab);
-    // Wait for node to be present -- will go away with implicit wait, replace with assert then
-    driver.waitFor(function () {
-      return element.exists;
-    });
-  }
-
-  // Click on the Forward button for the number of websites visited
-  for (var j = 1; j < LOCAL_TEST_PAGES.length; j++) {
-    browser.ui.navBar.forwardButton.click();
-
-    var element = new widgets.Element("id", LOCAL_TEST_PAGES[j].id, browser.content.activeTab);
-    // Wait for node to be present -- will go away with implicit wait, replace with assert then
-    driver.waitFor(function () {
-      return element.exists;
-    });
-  }
+  assert.ok(header.exists, "Header exists");
 }
 
 /**
  * Map test functions to litmus tests
  */
-// testBackAndForward.meta = {litmusids : [8032]};
+// testStopAndReload.meta = {litmusids : [8030]};
