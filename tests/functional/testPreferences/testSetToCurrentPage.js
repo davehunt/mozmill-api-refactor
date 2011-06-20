@@ -21,8 +21,8 @@
  *   Aakash Desai <adesai@mozilla.com>
  *   Henrik Skupin <hskupin@mozilla.com>
  *   Aaron Train <atrain@mozilla.com>
+ *   Alex Lakatos <alex.lakatos@softvision.ro>
  *   Geo Mealer <gmealer@mozilla.com>
- *   Owen Coutts <ocoutts@mozilla.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -38,44 +38,72 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-// Include required modules
+// Include the required modules
 var head = require("../../../lib/head");
-var widgets = require("../../../lib/ui/widgets");
+
+const LOCAL_TEST_FOLDER = collector.addHttpResource('../../../data/');
+const PAGE = LOCAL_TEST_FOLDER + 'layout/mozilla.html';
+
+const PREF_BROWSER_HOMEPAGE = "browser.startup.homepage";
+
+// SETUP/TEARDOWN HELPERS
+
+function openPage(page) {
+  browser.openURL(page);
+
+  var link = new Element("id", "Community", browser.content.activeTab);
+  if (!link.exists)
+    throw new Error("Could not find element '" + link + "' in page '" + page + "'");
+}
+
+// TEST HELPERS
+
+/**
+ * Set the current page as home page
+ *
+ * @param {MozMillController} controller
+ *        MozMillController of the window to operate on
+ */
+function prefDialogHomePageCallback(controller) {
+  var prefDialog = new prefs.preferencesDialog(controller);
+  prefDialog.paneId = 'paneMain';
+
+  // Set Home Page to the current page
+  var useCurrent = new elementslib.ID(controller.window.document, "useCurrent");
+  controller.click(useCurrent);
+
+  prefDialog.close(true);
+}
 
 // TEST
 
 function setupModule(aModule) {
   head.setup(aModule);
+
+  // Go to the starting page and verify the correct page has loaded
+  openPage(PAGE);
 }
 
 /**
- * Test the stop and reload buttons
+ * Set homepage to current page
  */
-var testStopAndReload = function()
-{
-  const URL = "http://www.mozilla.com/en-US/";
+function testSetHomePage() {
+  // Call Prefs Dialog and set Home Page
+  prefs.openPreferencesDialog(controller, prefDialogHomePageCallback);
 
-  // Go to the URL without waiting and stop before it can fully load.
-  browser.openURL(URL, 0);
-  browser.ui.navBar.stopButton.click();
+  tabs.closeAllTabs(controller);
 
-  // Even an element at the top of a page shouldn't exist when we hit the stop
-  // button extremely fast. Note use of existsNow, since we don't want to wait.
-  var header = new widgets.Element("id", "header", browser.content.activeTab);
-  assert.ok(!header.existsNow, "Header does not exist");
+  // Go to the saved home page and verify it's the correct page
+  var homeButton = new elementslib.ID(controller.window.document, "home-button");
+  controller.click(homeButton);
+  controller.waitForPageLoad();
 
-  // Reload, wait for it to completely load and test again
-  browser.openURL(URL);
-
-  var header = new widgets.Element("id", "header", browser.content.activeTab);
-  assert.ok(header.exists, "Header exists");
+  // Verify location bar with the saved home page
+  controller.assertValue(locationBar.urlbar, LOCAL_TEST_PAGE);
 }
 
 function teardownModule(aModule) {
   head.teardown(aModule);
+//  prefs.preferences.clearUserPref(BROWSER_HOMEPAGE);
 }
 
-/**
- * Map test functions to litmus tests
- */
-// testStopAndReload.meta = {litmusids : [8030]};

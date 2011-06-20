@@ -44,15 +44,3 @@ function testNavBar() {
   dump("navBar.urlBarText ID: " + myNavBar.urlBarText.node.id + "\n");
   myNavBar.homeButton.click();
 }
-
-//
-// function testTheDream() {
-//   var browser;
-//
-//   browser = new Browser("tag", "#main-window", {
-//     navBar: new Regions.NavBar("tag", "#nav-bar", {
-//       homeButton: new Widgets.Button("tag", "#homebutton"),
-//       urlBar:     new Widgets.TextBox("tag", "#urlbar")
-//     })
-//   });
-// }

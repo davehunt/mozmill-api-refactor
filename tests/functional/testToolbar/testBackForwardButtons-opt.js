@@ -51,7 +51,7 @@ const PAGES = [{url: LOCAL_TEST_FOLDER + 'layout/mozilla.html', id: 'community'}
                {url: LOCAL_TEST_FOLDER + 'layout/mozilla_mission.html', id: 'mission_statement'},
                {url: LOCAL_TEST_FOLDER + 'layout/mozilla_grants.html', id: 'accessibility'}];
 
-// SETUP/CLEANUP HELPERS
+// SETUP/TEARDOWN HELPERS
 
 function openPage(page) {
   // Open up the test page and validate that it's the page we expect to be using
@@ -67,20 +67,26 @@ function clickBackAndVerify(page) {
   // Click on the back button and verify that we landed on the page we expect
   browser.ui.navBar.backButton.click();
 
+  // This should be waitForPageLoad(), but it currently seems bugged when loading
+  // via back/forward.
+  driver.sleep(500);
+  // browser.waitForPageLoad();
+
   var element = new widgets.Element("id", page.id, browser.content.activeTab);
-  driver.waitFor(function () {
-    return element.exists;
-  });
+  assert.ok(element.exists, "Found '" + page.id + "'; correct page was landed on");
 }
 
 function clickForwardAndVerify(page) {
   // Click on the forward button and verify that we landed on the page we expect
   browser.ui.navBar.forwardButton.click();
 
+  // This should be waitForPageLoad(), but it currently seems bugged when loading
+  // via back/forward.
+  driver.sleep(500);
+  // browser.waitForPageLoad();
+
   var element = new widgets.Element("id", page.id, browser.content.activeTab);
-  driver.waitFor(function () {
-    return element.exists;
-  });
+  assert.ok(element.exists, "Found '" + page.id + "'; correct page was landed on");
 }
 
 // TEST
@@ -135,6 +141,10 @@ function teardownModule(aModule) {
 // In the test, loops have been unrolled and meat of loops moved into named helpers
 // for clarity. I would only use forEach-type structures with a large array, or in
 // non-test code. Helpers are named very literally.
+
+// All test results are asserted (could have been expected), rather than implied
+// by waitFor. Ultimately, explicitly posting results will be very important to our
+// reporting.
 
 // I also rearranged setup/test/teardown in chrono order. Minor, but helps read
 // the flow.
