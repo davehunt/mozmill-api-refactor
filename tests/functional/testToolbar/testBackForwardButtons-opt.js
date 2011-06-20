@@ -136,5 +136,8 @@ function teardownModule(aModule) {
 // for clarity. I would only use forEach-type structures with a large array, or in
 // non-test code. Helpers are named very literally.
 
+// I also rearranged setup/test/teardown in chrono order. Minor, but helps read
+// the flow.
+
 // Generally speaking, I documented where you expect things to be as part of the
 // flow (e.g. this will leave us on PAGES[3]). This helps with following the test.
