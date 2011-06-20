@@ -1,5 +1,14 @@
-var widgets = require("../../lib/ui/widgets");
-var navBar = require("../../lib/mixins/browser/navbar");
+var widgets = require("../../../lib/ui/widgets");
+var navBar = require("../../../lib/mixins/browser/navbar");
+var head = require("../../../lib/head");
+
+function setupModule(aModule) {
+  head.setup(aModule);
+}
+
+function teardownModule(aModule) {
+  head.teardown(aModule);
+}
 
 function testGetElement() {
   // get a single element, access its node, and dump it to console.
@@ -15,7 +24,7 @@ function testGetElementChain() {
   var myOwner = new widgets.Widget("tag", "#nav-bar");
   dump("ID: " + myOwner.node.id + "\n");
   var myOwned = new widgets.Widget("tag", "#urlbar", myOwner);
-  dump("ID: " + myOwned.node.id + "\n");  
+  dump("ID: " + myOwned.node.id + "\n");
   myOwned.click();
 }
 
@@ -36,10 +45,10 @@ function testNavBar() {
   myNavBar.homeButton.click();
 }
 
-// 
+//
 // function testTheDream() {
 //   var browser;
-//   
+//
 //   browser = new Browser("tag", "#main-window", {
 //     navBar: new Regions.NavBar("tag", "#nav-bar", {
 //       homeButton: new Widgets.Button("tag", "#homebutton"),

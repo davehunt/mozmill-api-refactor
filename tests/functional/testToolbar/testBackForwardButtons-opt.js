@@ -38,6 +38,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+// See bottom of file for notes about changes I did to help make the test clearer.
+
 // GLOBALS
 
 var head = require("../../../lib/head");
@@ -45,9 +47,6 @@ var widgets = require("../../../lib/ui/widgets");
 
 const LOCAL_TEST_FOLDER = collector.addHttpResource('../../../data/');
 
-// Using an array because the test is order-based, so indexes are convenient.
-// If the test was not order-based separate consts or a key/val dictionary would be
-// much more readable in the code. Also note the short constant name.
 const PAGES = [{url: LOCAL_TEST_FOLDER + 'layout/mozilla.html', id: 'community'},
                {url: LOCAL_TEST_FOLDER + 'layout/mozilla_mission.html', id: 'mission_statement'},
                {url: LOCAL_TEST_FOLDER + 'layout/mozilla_grants.html', id: 'accessibility'}];
@@ -79,7 +78,6 @@ function clickForwardAndVerify(page) {
   browser.ui.navBar.forwardButton.click();
 
   var element = new widgets.Element("id", page.id, browser.content.activeTab);
-  driver.sleep(250);
   driver.waitFor(function () {
     return element.exists;
   });
@@ -100,9 +98,6 @@ function setupModule(aModule) {
  * Test the back and forward buttons
  */
 function testBackAndForward() {
-  // Loops have been unrolled and meat of loops moved into named helpers for clarity.
-  // I would only use forEach-type structures with a large array, or in non-test code.
-
   // Click on the Back button and verify where we land; we start on PAGES[2]
   clickBackAndVerify(PAGES[1]);
   clickBackAndVerify(PAGES[0]);
@@ -112,11 +107,34 @@ function testBackAndForward() {
   clickForwardAndVerify(PAGES[2]);
 }
 
-function teardownModule(module) {
-  head.teardown(module);
+function teardownModule(aModule) {
+  head.teardown(aModule);
 }
 
 /**
  * Map test functions to litmus tests
  */
 // testBackAndForward.meta = {litmusids : [8032]};
+
+// NOTES ON CHANGES
+
+// PAGES is an array because the test is order-based, so indexes are convenient.
+// If the test was not order-based separate consts or a key/val dictionary would be
+// much more readable in the code. Also note the short constant name; the current
+// constant name is needlessly long.
+
+// Basically, we should not standardize on a single data structure used to feed the
+// test, and -definitely- not on an array. Arrays are the least readable structure
+// in code due to the need to match up the index. The most appropriate structure
+// for the test should be used, whether that's a const, obj, array, or whatever.
+
+// All setup has been moved into the setup function, including the initial load
+// of the pages for use in the test. This lets us review whether asserts and
+// user actions are used appropriately in setup vs. test.
+
+// In the test, loops have been unrolled and meat of loops moved into named helpers
+// for clarity. I would only use forEach-type structures with a large array, or in
+// non-test code. Helpers are named very literally.
+
+// Generally speaking, I documented where you expect things to be as part of the
+// flow (e.g. this will leave us on PAGES[3]). This helps with following the test.
