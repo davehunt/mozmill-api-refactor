@@ -42,25 +42,23 @@
 var head = require("../../../lib/head");
 var widgets = require("../../../lib/ui/widgets");
 
+// TEST
+
 function setupModule(aModule) {
   head.setup(aModule);
 }
-
-function teardownModule(aModule) {
-  head.teardown(aModule);
-}
-
-const URL = "http://www.mozilla.com/en-US/";
 
 /**
  * Test the stop and reload buttons
  */
 var testStopAndReload = function()
 {
+  const URL = "http://www.mozilla.com/en-US/";
+
   // Make sure we have a blank page
   browser.openURL("about:blank");
 
-  // Go to the URL without waiting and start loading for some milliseconds
+  // Go to the URL without waiting and stop before it can fully load.
   browser.openURL(URL, 0);
   browser.ui.navBar.stopButton.click();
 
@@ -69,11 +67,15 @@ var testStopAndReload = function()
   var header = new widgets.Element("id", "header", browser.content.activeTab);
   assert.ok(!header.exists, "Header does not exist");
 
-  // Reload, wait for it to completely loading and test again
+  // Reload, wait for it to completely load and test again
   browser.openURL(URL);
 
   var header = new widgets.Element("id", "header", browser.content.activeTab);
   assert.ok(header.exists, "Header exists");
+}
+
+function teardownModule(aModule) {
+  head.teardown(aModule);
 }
 
 /**
